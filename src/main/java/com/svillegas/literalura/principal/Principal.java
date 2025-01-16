@@ -21,7 +21,6 @@ public class Principal {
     private final LibroRepository libroRepository;
     private final AutorRepository autorRepository;
 
-//TODO ESTA ES LA VERSIONA MAS FUNCIONAL
     @Autowired
     public Principal(LibroRepository libroRepository, AutorRepository autorRepository) {
         this.libroRepository = libroRepository;
@@ -46,14 +45,12 @@ public class Principal {
                     """;
             System.out.println(menu);
             try {
-                // Intentar leer una opción válida
                 opcion = teclado.nextInt();
-                teclado.nextLine(); // Limpiar el buffer
+                teclado.nextLine();
             } catch (java.util.InputMismatchException e) {
-                // Si ocurre una excepción (por ejemplo, texto en lugar de un número)
                 System.out.println("Opción inválida. Por favor, ingresa un número.");
-                teclado.nextLine(); // Limpiar el buffer del scanner
-                continue; // Volver al inicio del ciclo
+                teclado.nextLine();
+                continue;
             }
 
 
@@ -92,30 +89,22 @@ public class Principal {
     }
 
 
-
-
     private void buscarLibro() {
         System.out.println("Escribe el libro:");
         var tituloLibro = teclado.nextLine();
 
-        // Consumir la API
         var json = consumoAPI.obtenerDatos(URL_BASE + "?search=" + tituloLibro.replace(" ", "+"));
         var datos = conversor.obtenerDatos(json, Datos.class);
 
-        // Procesar solo la primera coincidencia
         datos.resultados().stream().findFirst().ifPresent(libroAPI -> {
-            // Verificar si el libro ya existe en la base de datos
             Optional<Libro> libroExistente = libroRepository.findByTitulo(libroAPI.titulo());
             if (libroExistente.isEmpty()) {
-                // Convertir los autores
                 List<Autor> autores = libroAPI.autores().stream()
                         .map(autorAPI -> new Autor(
                                 autorAPI.nombre(),
                                 autorAPI.fechaDeNacimiento(),
                                 autorAPI.fechaDeFallecimiento()))
                         .toList();
-
-                // Crear y guardar el libro
                 Libro nuevoLibro = new Libro(
                         libroAPI.titulo(),
                         autores,
@@ -123,7 +112,6 @@ public class Principal {
                         libroAPI.numeroDeDescargas()
                 );
 
-                // Verificar longitud del título antes de guardar
                 if (nuevoLibro.getTitulo().length() > 255) {
                     nuevoLibro.setTitulo(nuevoLibro.getTitulo().substring(0, 255)); // Truncar si es necesario
                 }
@@ -152,22 +140,18 @@ public class Principal {
     }
 
     private void listarAutores() {
-        // Obtener la lista de autores con todos los libros relacionados
         List<Autor> autores = autorRepository.findAllWithLibros();
 
-        // Usar un conjunto para evitar duplicados basados en el nombre del autor
         Set<String> nombresProcesados = new HashSet<>();
 
-        // Procesar cada autor y mostrar la información
         autores.stream()
-                .filter(autor -> nombresProcesados.add(autor.getNombre())) // Filtrar duplicados por nombre
+                .filter(autor -> nombresProcesados.add(autor.getNombre()))
                 .forEach(autor -> {
                     System.out.println("================= AUTOR =================");
                     System.out.println("Autor: " + autor.getNombre());
                     System.out.println("Fecha de Nacimiento: " + autor.getFechaDeNacimiento());
                     System.out.println("Fecha de Fallecimiento: " + autor.getFechaDeFallecimiento());
 
-                    // Mostrar los libros escritos por el autor
                     System.out.println("Libros:");
                     autor.getLibros().forEach(libro ->
                             System.out.println(" - " + libro.getTitulo())
@@ -176,25 +160,19 @@ public class Principal {
     }
 
     private void autoresVivos() {
-        // Solicitar el año al usuario
         System.out.println("Ingresa un año:");
         int anio = teclado.nextInt();
-        teclado.nextLine(); // Consumir el salto de línea
 
-        // Obtener todos los autores
         List<Autor> autores = autorRepository.findAll();
 
-        // Filtrar autores vivos en el año especificado
         List<Autor> autoresVivosEnElAno = autores.stream()
                 .filter(autor -> autor.getFechaDeNacimiento() != null && autor.getFechaDeNacimiento() <= anio &&
                         (autor.getFechaDeFallecimiento() == null || autor.getFechaDeFallecimiento() >= anio))
                 .collect(Collectors.toList());
 
-        // Verificar si se encontraron autores
         if (autoresVivosEnElAno.isEmpty()) {
             System.out.println("No hay autores registrados para el año ingresado.");
         } else {
-            // Mostrar los autores vivos en el año especificado
             autoresVivosEnElAno.forEach(autor -> {
                 System.out.println("================= AUTOR =================");
                 System.out.println("Autor: " + autor.getNombre());
@@ -202,7 +180,6 @@ public class Principal {
                 System.out.println("Fecha de Fallecimiento: " +
                         (autor.getFechaDeFallecimiento() != null ? autor.getFechaDeFallecimiento() : "Sigue Vivo"));
 
-                // Mostrar los libros del autor
                 System.out.println("Libros:");
                 autor.getLibros().forEach(libro ->
                         System.out.println(" - " + libro.getTitulo())
@@ -212,27 +189,22 @@ public class Principal {
     }
 
     private void listarIdioma() {
-        // Mostrar opciones de idiomas
         System.out.println("Elige un idioma:");
         System.out.println("1. es - Español");
         System.out.println("2. en - Inglés");
         System.out.println("3. fr - Francés");
         System.out.println("4. pt - Portugués");
 
-        // Leer la opción del usuario
         String idiomaSeleccionado = teclado.nextLine();
 
-        // Validar que el idioma seleccionado sea uno de los posibles
         if (!idiomaSeleccionado.equals("es") && !idiomaSeleccionado.equals("en") &&
                 !idiomaSeleccionado.equals("fr") && !idiomaSeleccionado.equals("pt")) {
             System.out.println("Opción no válida. Por favor ingresa uno de los siguientes idiomas: es, en, fr, pt.");
-            return; // Salir si la opción no es válida
+            return;
         }
 
-        // Buscar libros por idioma
         List<Libro> librosPorIdioma = libroRepository.findByIdiomas(idiomaSeleccionado);
 
-        // Mostrar la información de los libros encontrados
         if (librosPorIdioma.isEmpty()) {
             System.out.println("No se encontraron libros en el idioma " + idiomaSeleccionado + ".");
         } else {

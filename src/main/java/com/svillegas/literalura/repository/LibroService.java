@@ -23,16 +23,13 @@ public class LibroService {
         for (Autor autor : libro.getAutores()) {
             Optional<Autor> autorExistente = autorRepository.findByNombre(autor.getNombre());
             if (autorExistente.isPresent()) {
-                // Usar el autor existente
                 autoresProcesados.add(autorExistente.get());
             } else {
-                // Guardar y agregar un nuevo autor
                 Autor nuevoAutor = autorRepository.save(autor);
                 autoresProcesados.add(nuevoAutor);
             }
         }
 
-        // Actualizar los autores del libro y guardar el libro
         libro.setAutores(autoresProcesados);
         libroRepository.save(libro);
     }

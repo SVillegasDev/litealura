@@ -33,15 +33,6 @@ public class Libro {
     public Libro() {
     }
 
-    /*
-    public Libro(DatosLibros datosLibros) {
-        this.titulo = datosLibros.titulo();
-        this.idiomas = datosLibros.idiomas();
-        this.numeroDeDescargas = datosLibros.numeroDeDescargas();
-        this.autores = new ArrayList<>();
-    }
-    */
-
     @Override
     public String toString() {
         StringBuilder autoresNombres = new StringBuilder();
