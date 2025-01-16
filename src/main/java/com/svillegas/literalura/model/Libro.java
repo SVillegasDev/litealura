@@ -1,6 +1,5 @@
 package com.svillegas.literalura.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -12,41 +11,51 @@ public class Libro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true)
     private String titulo;
+    private String idiomas;
+    private Double descargas;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "libros_autores",
-            joinColumns = @JoinColumn(name = "libro_id"),
-            inverseJoinColumns = @JoinColumn(name = "autor_id")
+            joinColumns = @JoinColumn(name = "libros_id"),
+            inverseJoinColumns = @JoinColumn(name = "autores_id")
     )
-    private List<Autor> autores = new ArrayList<>();
+    private List<Autor> autores;
 
-    @ElementCollection
-    @CollectionTable(name = "libro_idiomas", joinColumns = @JoinColumn(name = "libro_id"))
-    @Column(name = "idioma")
-    List<String> idiomas;
+    public Libro(String titulo, List<Autor> autores, List<String> idiomas, Double descargas) {
+        this.titulo = titulo;
+        this.autores = autores;
+        this.idiomas = String.join(",", idiomas);
+        this.descargas = descargas;
+    }
 
-    private Double numeroDeDescargas;
+    public Libro() {
+    }
 
-    public Libro() {}
-
-    public Libro(DatosLibros datosLibros, List<Autor> autores) {
+    /*
+    public Libro(DatosLibros datosLibros) {
         this.titulo = datosLibros.titulo();
         this.idiomas = datosLibros.idiomas();
         this.numeroDeDescargas = datosLibros.numeroDeDescargas();
-        this.autores.addAll(autores);
+        this.autores = new ArrayList<>();
     }
+    */
 
     @Override
     public String toString() {
-        return "Libro{" +
-                ", titulo='" + titulo + '\'' +
-                ", autores=" + autores +
-                ", idiomas=" + idiomas +
-                ", numeroDeDescargas=" + numeroDeDescargas;
+        StringBuilder autoresNombres = new StringBuilder();
+        for (Autor autor : autores) {
+            if (autoresNombres.length() > 0) {
+                autoresNombres.append(", ");
+            }
+            autoresNombres.append(autor.getNombre());
+        }
+
+        return "Título: " + titulo + "\n" +
+                "Autores: " + autoresNombres + "\n" +
+                "Idiomas: " + String.join(", ", idiomas) + "\n" +
+                "Descargas: " + descargas + "\n";
     }
 
     public Long getId() {
@@ -73,19 +82,19 @@ public class Libro {
         this.autores = autores;
     }
 
-    public List<String> getIdiomas() {
+    public String getIdiomas() {
         return idiomas;
     }
 
-    public void setIdiomas(List<String> idiomas) {
+    public void setIdiomas(String idiomas) {
         this.idiomas = idiomas;
     }
 
-    public Double getNumeroDeDescargas() {
-        return numeroDeDescargas;
+    public Double getDescargas() {
+        return descargas;
     }
 
-    public void setNumeroDeDescargas(Double numeroDeDescargas) {
-        this.numeroDeDescargas = numeroDeDescargas;
+    public void setDescargas(Double descargas) {
+        this.descargas = descargas;
     }
 }

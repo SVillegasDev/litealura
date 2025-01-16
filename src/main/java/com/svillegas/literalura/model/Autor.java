@@ -1,9 +1,7 @@
 package com.svillegas.literalura.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,18 +11,19 @@ public class Autor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
-    private String fechaDeNacimiento;
-    private String fechaDeFallecimiento;
+    private Integer fechaDeNacimiento;
+    private Integer fechaDeFallecimiento;
 
-    @ManyToMany(mappedBy = "autores")
-    private List<Libro> libros = new ArrayList<>();
+    @ManyToMany(mappedBy = "autores", fetch = FetchType.EAGER)
+    private List<Libro> libros;
 
-    public Autor() {}
+    public Autor(String nombre, String fechaDeNacimiento, String fechaDeFallecimiento) {
+        this.nombre = nombre;
+        this.fechaDeNacimiento = Integer.valueOf(fechaDeNacimiento);
+        this.fechaDeFallecimiento = Integer.valueOf(fechaDeFallecimiento);
+    }
 
-    public Autor(DatosAutor datosAutor) {
-        this.nombre = datosAutor.nombre();
-        this.fechaDeNacimiento = datosAutor.fechaDeNacimiento();
-        this.fechaDeFallecimiento = datosAutor.fechaDeFallecimiento();
+    public Autor() {
     }
 
     @Override
@@ -33,6 +32,22 @@ public class Autor {
                 ", nombre='" + nombre + '\'' +
                 ", fechaDeNacimiento='" + fechaDeNacimiento + '\'' +
                 ", fechaDeFallecimiento='" + fechaDeFallecimiento;
+    }
+
+    public Integer getFechaDeNacimiento() {
+        return fechaDeNacimiento;
+    }
+
+    public void setFechaDeNacimiento(Integer fechaDeNacimiento) {
+        this.fechaDeNacimiento = fechaDeNacimiento;
+    }
+
+    public Integer getFechaDeFallecimiento() {
+        return fechaDeFallecimiento;
+    }
+
+    public void setFechaDeFallecimiento(Integer fechaDeFallecimiento) {
+        this.fechaDeFallecimiento = fechaDeFallecimiento;
     }
 
     public Long getId() {
@@ -49,22 +64,6 @@ public class Autor {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public String getFechaDeNacimiento() {
-        return fechaDeNacimiento;
-    }
-
-    public void setFechaDeNacimiento(String fechaDeNacimiento) {
-        this.fechaDeNacimiento = fechaDeNacimiento;
-    }
-
-    public String getFechaDeFallecimiento() {
-        return fechaDeFallecimiento;
-    }
-
-    public void setFechaDeFallecimiento(String fechaDeFallecimiento) {
-        this.fechaDeFallecimiento = fechaDeFallecimiento;
     }
 
     public List<Libro> getLibros() {
